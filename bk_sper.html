@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Paper Reader</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <div class="brand-row">
+            <span class="brand-icon">📄</span>
+            <h1>AI Paper Reader</h1>
+          </div>
+          <p class="subtitle">Đọc paper và giải thích bằng tiếng Việt</p>
+        </div>
+        <button id="settingsButton" class="icon-button" aria-label="Cài đặt" title="Cài đặt">⚙️</button>
+      </header>
+
+      <main>
+        <section class="action-card">
+          <div id="currentPage" class="current-page">Đang đọc trang hiện tại…</div>
+
+          <button id="analyzeButton" class="primary-button">
+            <span id="analyzeButtonText">Phân tích paper hiện tại</span>
+          </button>
+
+          <button id="forceAnalyzeButton" class="secondary-button hidden">
+            Phân tích lại bằng AI
+          </button>
+
+          <div id="status" class="status hidden" role="status"></div>
+        </section>
+
+        <section id="emptyState" class="empty-state">
+          <div class="empty-icon">🔬</div>
+          <h2>Chưa có kết quả</h2>
+          <p>
+            Mở một paper hoặc PDF rồi bấm <strong>Phân tích paper hiện tại</strong>.
+          </p>
+        </section>
+
+        <section id="result" class="result hidden">
+          <article class="paper-header card">
+            <span class="eyebrow">PAPER</span>
+            <h2 id="paperTitle"></h2>
+
+            <div class="meta-block">
+              <span class="meta-label">Authors</span>
+              <p id="paperAuthors"></p>
+            </div>
+
+            <div class="meta-block">
+              <span class="meta-label">Lĩnh vực</span>
+              <p id="paperField"></p>
+            </div>
+          </article>
+
+          <article class="card section-card">
+            <h3>🎯 Paper giải quyết vấn đề gì?</h3>
+            <p id="problem"></p>
+          </article>
+
+          <article class="card section-card">
+            <h3>💡 Ý tưởng chính</h3>
+            <p id="mainIdea"></p>
+          </article>
+
+          <article class="card section-card">
+            <h3>🔬 Phương pháp</h3>
+            <div id="methods"></div>
+          </article>
+
+          <article class="card section-card">
+            <h3>📊 Dataset</h3>
+            <div id="datasets"></div>
+          </article>
+
+          <article class="card section-card">
+            <h3>📈 Kết quả</h3>
+            <div id="resultsList"></div>
+          </article>
+
+          <article class="card section-card warning-card">
+            <h3>⚠️ Hạn chế</h3>
+            <div id="limitations"></div>
+          </article>
+
+          <article class="card section-card">
+            <h3>⭐ Đóng góp chính</h3>
+            <div id="contributions"></div>
+          </article>
+
+          <article class="card section-card simple-card">
+            <h3>🧠 Giải thích đơn giản</h3>
+            <p id="simpleExplanation"></p>
+          </article>
+
+          <div class="source-note">
+            <span>🔗</span>
+            <a id="sourceLink" target="_blank" rel="noreferrer">Mở nguồn paper</a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="settingsDialog">
+      <form method="dialog" class="settings-form">
+        <div class="dialog-header">
+          <div>
+            <h2>Cài đặt</h2>
+            <p>Thông tin chỉ lưu trong Chrome/Edge trên máy này.</p>
+          </div>
+          <button value="cancel" class="icon-button" aria-label="Đóng">✕</button>
+        </div>
+
+        <label>
+          OpenAI API key
+          <input
+            id="apiKeyInput"
+            type="password"
+            autocomplete="off"
+            placeholder="sk-..."
+          />
+        </label>
+
+        <label>
+          Model
+          <input
+            id="modelInput"
+            type="text"
+            value="gpt-6-luna"
+            placeholder="gpt-6-luna"
+          />
+        </label>
+
+        <p class="settings-help">
+          Mặc định dùng <code>gpt-6-luna</code> để tiết kiệm chi phí. Bạn có thể thay
+          model nếu tài khoản API của bạn dùng model khác.
+        </p>
+
+        <div class="dialog-actions">
+          <button value="cancel" class="secondary-button">Hủy</button>
+          <button id="saveSettingsButton" value="default" class="primary-button">Lưu</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

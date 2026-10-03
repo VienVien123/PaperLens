@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+
+  "name": "AI Paper Reader",
+
+  "version": "1.1.0",
+
+  "description": "Đọc và phân tích research paper bằng Gemini AI ngay trong Chrome/Edge.",
+
+  "minimum_chrome_version": "114",
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "storage",
+    "tabs"
+  ],
+
+  "host_permissions": [
+    "<all_urls>",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+
+  "action": {
+    "default_title": "AI Paper Reader"
+  },
+
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  }
+}

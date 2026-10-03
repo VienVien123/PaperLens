@@ -1,0 +1,531 @@
+:root {
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #18202a;
+  background: #f5f7fa;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 340px;
+  background:
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 28%),
+    #f5f7fa;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid #e4e8ef;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-icon {
+  font-size: 22px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 5px 0 0 30px;
+  color: #687385;
+  font-size: 12px;
+}
+
+main {
+  padding: 14px;
+}
+
+.action-card,
+.card {
+  border: 1px solid #e3e7ed;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(35, 45, 60, 0.05);
+}
+
+.action-card {
+  padding: 13px;
+  margin-bottom: 14px;
+}
+
+.current-page {
+  margin-bottom: 10px;
+  color: #5e6878;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.primary-button,
+.secondary-button {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 700;
+  transition:
+    transform 120ms ease,
+    opacity 120ms ease;
+}
+
+.primary-button {
+  border: 1px solid #1f2937;
+  color: white;
+  background: #1f2937;
+}
+
+.secondary-button {
+  margin-top: 8px;
+  border: 1px solid #d8dde6;
+  color: #273142;
+  background: white;
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+  transform: translateY(-1px);
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.icon-button {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e0e5ec;
+  border-radius: 10px;
+  background: white;
+}
+
+.status {
+  margin-top: 10px;
+  border-radius: 9px;
+  padding: 9px 10px;
+  color: #334155;
+  background: #f1f5f9;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.status.error {
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.status.success {
+  color: #166534;
+  background: #f0fdf4;
+}
+
+.empty-state {
+  padding: 40px 22px;
+  color: #687385;
+  text-align: center;
+}
+
+.empty-state h2 {
+  margin: 8px 0 5px;
+  color: #253041;
+  font-size: 16px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.empty-icon {
+  font-size: 34px;
+}
+
+.result {
+  display: grid;
+  gap: 11px;
+}
+
+.card {
+  padding: 15px;
+}
+
+.paper-header h2 {
+  margin: 5px 0 14px;
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.eyebrow,
+.meta-label {
+  color: #7b8493;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meta-block + .meta-block {
+  margin-top: 10px;
+}
+
+.meta-block p {
+  margin: 3px 0 0;
+  color: #384356;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.section-card h3 {
+  margin: 0 0 9px;
+  font-size: 14px;
+}
+
+.section-card p {
+  margin: 0;
+  color: #3f4a5d;
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.section-list {
+  margin: 0;
+  padding-left: 19px;
+  color: #3f4a5d;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.section-list li + li {
+  margin-top: 6px;
+}
+
+.muted {
+  margin: 0;
+  color: #8a94a3;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.warning-card {
+  border-color: #f0e1b7;
+  background: #fffdf7;
+}
+
+.simple-card {
+  border-color: #dce8ff;
+  background: #f8fbff;
+}
+
+.source-note {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 4px 4px 18px;
+  font-size: 12px;
+}
+
+.source-note a {
+  color: #485f9e;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.hidden {
+  display: none !important;
+}
+
+dialog {
+  width: min(420px, calc(100vw - 28px));
+  border: 1px solid #dfe4eb;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 22px 80px rgba(15, 23, 42, 0.22);
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.settings-form {
+  padding: 16px;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.dialog-header p {
+  margin: 4px 0 0;
+  color: #778193;
+  font-size: 11px;
+}
+
+.settings-form label {
+  display: block;
+  margin-top: 12px;
+  color: #364152;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.settings-form input {
+  width: 100%;
+  margin-top: 6px;
+  border: 1px solid #d8dee8;
+  border-radius: 10px;
+  padding: 10px 11px;
+  outline: none;
+}
+
+.settings-form input:focus {
+  border-color: #8797b7;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+.settings-help {
+  color: #717b8c;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.dialog-actions .secondary-button {
+  margin-top: 0;
+}
+
+
+/* ============================================================
+   Q&A - giữ phong cách giao diện ban đầu
+============================================================ */
+
+.qa-entry {
+  margin-top: 2px;
+}
+
+.qa-toggle-button {
+  width: 100%;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 9px;
+
+  padding: 13px 15px;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 14px;
+
+  background: #ffffff;
+  color: #273142;
+
+  box-shadow: 0 8px 24px rgba(35, 45, 60, 0.05);
+
+  text-align: left;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.qa-toggle-button:hover {
+  border-color: #cad3e1;
+}
+
+.qa-chevron {
+  color: #8993a3;
+  font-size: 15px;
+}
+
+.qa-panel {
+  margin-top: 9px;
+  padding: 14px;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  box-shadow: 0 8px 24px rgba(35, 45, 60, 0.05);
+}
+
+.qa-panel-header {
+  margin-bottom: 12px;
+}
+
+.qa-panel-header h3 {
+  margin: 0;
+  color: #222d3d;
+  font-size: 14px;
+}
+
+.qa-panel-header p {
+  margin: 4px 0 0;
+  color: #7a8494;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.qa-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  max-height: 360px;
+  overflow-y: auto;
+
+  margin-bottom: 11px;
+}
+
+.qa-message {
+  max-width: 94%;
+  border-radius: 12px;
+  padding: 9px 11px;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.qa-user {
+  align-self: flex-end;
+
+  border: 1px solid #d9e4fb;
+  background: #f2f6ff;
+}
+
+.qa-assistant {
+  align-self: flex-start;
+
+  border: 1px solid #e4e8ee;
+  background: #f8f9fb;
+}
+
+.qa-message-label {
+  margin-bottom: 3px;
+
+  color: #7b8493;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.qa-message-content {
+  color: #384356;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.qa-composer {
+  display: grid;
+  gap: 8px;
+}
+
+.question-input {
+  width: 100%;
+  min-height: 76px;
+  max-height: 180px;
+
+  resize: vertical;
+
+  border: 1px solid #d8dee8;
+  border-radius: 11px;
+
+  padding: 10px 11px;
+
+  color: #263143;
+  background: #ffffff;
+
+  outline: none;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.question-input:focus {
+  border-color: #8797b7;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+.question-input:disabled {
+  cursor: not-allowed;
+  background: #f4f5f7;
+}
+
+.qa-send-button {
+  margin: 0;
+}
+
+.qa-status {
+  margin-top: 9px;
+  border-radius: 9px;
+  padding: 8px 10px;
+
+  color: #5d6878;
+  background: #f1f5f9;
+
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.qa-status.error {
+  color: #991b1b;
+  background: #fef2f2;
+}
