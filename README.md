@@ -1,317 +1,134 @@
-# AI Paper Reader — Chrome/Edge Extension
+﻿# AI Paper Reader — Chrome/Edge Extension
 
-Extension cá nhân để đọc research paper/PDF trên trình duyệt và trả về:
+A browser extension that analyzes research papers and explains them in Vietnamese using Gemini. Read HTML papers or PDFs, review a structured analysis in the browser side panel, and ask follow-up questions about the paper.
 
-- Tên paper
-- Authors
-- Lĩnh vực
-- Paper giải quyết vấn đề gì
-- Ý tưởng chính
-- Phương pháp
-- Dataset
-- Kết quả
-- Hạn chế
-- Đóng góp chính
-- Giải thích đơn giản bằng tiếng Việt
+The extension runs in the browser and calls Gemini directly. No application backend or separate database is required.
 
-Không có chatbot, không có server, không có database.
+## Features
 
----
+- Extract paper content from HTML pages and text-based PDFs.
+- Analyze the title, authors, research field, problem, main idea, methods, datasets, results, limitations, and contributions.
+- Explain methods in detail: identify the main methods, describe each component, explain its purpose and role, and walk through its inputs, operations, and outputs.
+- Present multi-step pipelines in processing order, including connections between steps and separate training and inference stages when described in the paper.
+- Provide a plain-language explanation for readers without specialized knowledge of the field.
+- Answer follow-up questions using the extracted paper content.
+- Cache analysis and paper text for up to eight papers locally.
+- Let users configure their own Gemini API key and model.
 
-## 1. Kiến trúc
+The interface, analysis, and Q&A responses are currently in Vietnamese. Paper titles, author names, and relevant technical terms retain their original wording. The prompts instruct the model to identify missing information instead of inventing paper details.
 
-```text
-Chrome / Edge
-    |
-    |-- Trang paper HTML
-    |       -> chrome.scripting đọc text
-    |
-    |-- PDF
-    |       -> pdfjs-dist đọc text
-    |
-    v
-Chọn phần quan trọng của paper
-    |
-    v
-OpenAI Responses API
-    |
-    v
-Structured JSON
-    |
-    v
-Chrome Side Panel
-```
+## Requirements
 
-API key được lưu bằng `chrome.storage.local` trên profile trình duyệt của bạn.
+- Node.js 22.13.0 or later, compatible with the dependencies' declared engine requirements.
+- npm.
+- Chrome 114+ or a Chromium-based Edge version with side panel support. The manifest declares Chrome 114 as its minimum; use a recent browser for compatibility with the bundled PDF.js library.
+- A Gemini API key with available quota and access to the model you configure.
 
----
-
-## 2. Yêu cầu
-
-Cài:
-
-- Node.js 20+ (khuyên dùng Node.js 22 LTS)
-- npm
-- Chrome 114+ hoặc Edge Chromium tương đương
-- OpenAI API key có billing/quota
-
-Kiểm tra:
+Check your local tools:
 
 ```bash
-node -v
-npm -v
+node --version
+npm --version
 ```
 
----
+## Installation
 
-## 3. Cài thư viện
-
-Mở Terminal tại folder project:
+From the project directory, install dependencies and build the extension:
 
 ```bash
 npm install
-```
-
----
-
-## 4. Build extension
-
-```bash
 npm run build
 ```
 
-Sau khi chạy xong sẽ có:
+On Windows, if PowerShell blocks `npm.ps1`, use `npm.cmd`:
+
+```powershell
+npm.cmd install
+npm.cmd run build
+```
+
+The build creates a `dist/` directory containing the extension manifest, background service worker, side panel, and bundled assets.
+
+### Load the extension
+
+1. Open `chrome://extensions` in Chrome or `edge://extensions` in Edge.
+2. Enable **Developer mode**.
+3. Click **Load unpacked**.
+4. Select the project's `dist/` directory.
+5. Optionally pin **AI Paper Reader** to the toolbar.
+6. Click the extension icon to open the side panel.
+
+### Configure Gemini
+
+1. Open settings with the gear button in the side panel.
+2. Enter your Gemini API key.
+3. Enter a Gemini model ID available to your account.
+4. Click **Lưu** (Save).
+
+Both an API key and a model are required. The extension uses the model you save; it does not automatically switch to another model.
+
+Settings are stored in `chrome.storage.local` for the current browser profile. No API key needs to be added to the source code or a `.env` file.
+
+## Usage
+
+### Analyze a paper
+
+1. Open a paper's HTML page or a direct PDF URL.
+2. Open the extension side panel.
+3. Click **Phân tích paper hiện tại** (Analyze current paper).
+4. Read the structured analysis and methods explanation.
+
+Supported extraction paths include arXiv HTML/PDF pages, J-STAGE PDF endpoints, and publisher pages that expose PDF links through metadata or embedded viewers. Actual access depends on the publisher and the browser's permissions.
+
+For Google Scholar, open an individual paper or its PDF before analyzing it.
+
+### Ask follow-up questions
+
+After an analysis is available, click **Hỏi về paper này** (Ask about this paper), enter a question, and click **Gửi câu hỏi** (Send question).
+
+Q&A uses the full extracted paper text rather than the shortened summary excerpt. Each request also includes up to six recent conversation messages. Very long papers can exceed the selected model's context limit.
+
+### Reanalyze a paper
+
+The extension reuses a cached analysis for the same URL when available. Click **Phân tích lại bằng Gemini** (Reanalyze with Gemini) to request a fresh analysis, including after changes to the summary prompt or model settings.
+
+### Open a local PDF
+
+To read a `file://` PDF, open the extension's **Details** page in your browser's extension manager and enable **Allow access to file URLs**. Then open the PDF and analyze it from the side panel.
+
+## How it works
 
 ```text
-dist/
-├── manifest.json
-├── service-worker.js
-├── sidepanel.html
-└── assets/
+Active browser tab
+    |
+    +-- HTML paper --> Extract text with chrome.scripting
+    |
+    +-- PDF --------> Download and extract text with PDF.js
+    |
+    +-- Summary --> Clean text and select sections for long papers
+    |                   |
+    |                   v
+    |               Gemini API --> Structured JSON --> Side panel
+    |
+    +-- Q&A ------> Full extracted text + question + recent history
+                        |
+                        v
+                    Gemini API --> Answer in the side panel
 ```
 
-ĐÂY là folder cài vào trình duyệt.
+When HTML extraction yields too little content, the extension can try PDF links found in page metadata or embedded viewers. It validates downloaded content to distinguish PDFs from HTML login or error pages.
 
----
+### Long papers
 
-## 5. Cài trên Google Chrome
+`src/paperProcessing.js` limits the summary input to approximately **110,000 characters**. It normalizes extracted text and removes the references section when detected.
 
-Mở:
+For longer documents, it tries to select recognized sections such as the abstract, introduction, methods, experiments, results, and conclusions. If section detection is insufficient, it samples across the document. Some details may therefore be omitted from the summary input.
 
-```text
-chrome://extensions
-```
+Adjust `MAX_INPUT_CHARS` in that file to change the limit. Larger inputs may increase API usage and must fit within the selected model's limits.
 
-Sau đó:
+### Structured analysis
 
-1. Bật **Developer mode**
-2. Bấm **Load unpacked**
-3. Chọn folder `dist`
-4. Pin extension `AI Paper Reader` lên thanh công cụ nếu muốn
-
-Bấm icon extension -> Chrome Side Panel sẽ mở.
-
-Chrome Side Panel API cần Chrome 114 trở lên.
-
----
-
-## 6. Cài trên Microsoft Edge
-
-Mở:
-
-```text
-edge://extensions
-```
-
-Sau đó:
-
-1. Bật **Developer mode**
-2. Bấm **Load unpacked**
-3. Chọn folder `dist`
-
----
-
-## 7. Nhập API key
-
-Trong Side Panel:
-
-1. Bấm `⚙️`
-2. Dán OpenAI API key
-3. Model mặc định: `gpt-6-luna`
-4. Bấm **Lưu**
-
-Bạn có thể đổi model bất kỳ lúc nào.
-
-API key KHÔNG được viết cứng trong source code. Nó được lưu trong browser storage của profile hiện tại.
-
-> Đây là kiến trúc dành cho một mình bạn dùng. Nếu phát hành extension cho người khác, không nên để API key phía client; khi đó nên có backend.
-
----
-
-## 8. Cách dùng
-
-### arXiv HTML
-
-Ví dụ mở:
-
-```text
-https://arxiv.org/html/...
-```
-
-Bấm extension -> **Phân tích paper hiện tại**.
-
-### arXiv PDF
-
-Ví dụ:
-
-```text
-https://arxiv.org/pdf/1706.03762
-```
-
-Bấm extension -> **Phân tích paper hiện tại**.
-
-Extension sẽ:
-
-1. tải PDF,
-2. dùng PDF.js lấy text,
-3. bỏ phần References nếu nhận diện được,
-4. nếu paper quá dài sẽ lấy các section quan trọng,
-5. gửi text sang OpenAI,
-6. nhận JSON có schema cố định,
-7. render ra Side Panel.
-
-### PDF từ J-STAGE và các trang nhà xuất bản
-
-Extension nhận diện URL `/_pdf`, `/pdf/`, `.pdf#page=...` và các link tải PDF không có đuôi file. Khi trang HTML không có đủ nội dung, extension thử link PDF trong metadata hoặc khung nhúng, rồi kiểm tra dữ liệu tại URL hiện tại. Trang đăng nhập/lỗi trả về thay cho PDF sẽ có thông báo riêng. PDF scan vẫn cần OCR và chưa được hỗ trợ.
-
-### Google Scholar
-
-Google Scholar chủ yếu là trang tìm kiếm.
-
-Đúng flow:
-
-```text
-Google Scholar
-   -> click paper hoặc [PDF]
-   -> mở paper/PDF
-   -> bấm AI Paper Reader
-```
-
-Nếu bấm Analyze ngay tại trang danh sách Google Scholar, extension sẽ yêu cầu bạn mở paper trước.
-
----
-
-## 9. PDF local trên máy
-
-Nếu muốn đọc:
-
-```text
-file:///C:/...
-```
-
-hoặc PDF local trên macOS/Linux:
-
-Vào `chrome://extensions` -> AI Paper Reader -> **Details** -> bật:
-
-**Allow access to file URLs**
-
-Sau đó mở PDF và dùng extension.
-
----
-
-## 10. Paper quá dài
-
-File:
-
-```text
-src/paperProcessing.js
-```
-
-đang giới hạn khoảng:
-
-```js
-110_000
-```
-
-ký tự gửi AI.
-
-Nếu paper dài hơn:
-
-- ưu tiên title/đầu paper,
-- tìm Abstract,
-- Introduction,
-- Method/Approach,
-- Experiments,
-- Results,
-- Discussion,
-- Limitations,
-- Conclusion,
-- bỏ References,
-- nếu không nhận diện section tốt thì lấy mẫu xuyên suốt document.
-
-Muốn tăng:
-
-```js
-const MAX_INPUT_CHARS = 110_000;
-```
-
-Ví dụ:
-
-```js
-const MAX_INPUT_CHARS = 180_000;
-```
-
-Nhưng input dài hơn sẽ tốn token/API cost hơn.
-
----
-
-## 11. Thay model
-
-Mở Settings trong extension.
-
-Ví dụ:
-
-```text
-gpt-6-luna
-```
-
-Project không hard-code model trong UI logic; model được lưu ở:
-
-```text
-chrome.storage.local
-```
-
----
-
-## 12. Sửa prompt AI
-
-File:
-
-```text
-public/service-worker.js
-```
-
-Tìm:
-
-```js
-const systemPrompt = `...`
-```
-
-Đây là nơi quy định cách AI đọc paper.
-
-Schema JSON cũng nằm ngay trong cùng file:
-
-```js
-const schema = {
-  ...
-}
-```
-
----
-
-## 13. Output JSON
-
-AI bắt buộc trả dạng:
+The summary request uses a JSON response schema with these fields:
 
 ```json
 {
@@ -329,94 +146,41 @@ AI bắt buộc trả dạng:
 }
 ```
 
-Dùng Structured Outputs để giảm trường hợp AI trả sai format.
+### Local storage and data flow
 
----
+The extension stores the Gemini API key, selected model, and up to **eight** paper entries in `chrome.storage.local`. Each paper entry includes its analysis, extracted text for Q&A, and a save timestamp, keyed by URL.
 
-## 14. Cache
+Analysis requests send the prepared paper excerpt, page title, and source URL to Gemini. Q&A requests send the extracted paper text, question, recent conversation history, title, and source URL. This is an online AI workflow.
 
-Kết quả được lưu local theo URL.
+The API key is used directly by the extension and is accessible to someone with access to the browser profile. Keep credentials out of source control and use your own key in settings.
 
-Tối đa:
-
-```text
-30 papers
-```
-
-File:
-
-```text
-src/main.js
-```
-
-Tìm:
-
-```js
-entries.slice(0, 30)
-```
-
-Mở lại cùng URL -> extension sẽ dùng kết quả cũ, không tốn API call.
-
-Muốn gọi lại AI:
-
-```text
-Phân tích lại bằng AI
-```
-
----
-
-## 15. Các giới hạn hiện tại
-
-### PDF scan
-
-Nếu PDF chỉ là ảnh, không có text layer:
-
-```text
-Không hoạt động
-```
-
-vì bản này chưa có OCR.
-
-Academic PDF từ arXiv thường có text layer.
-
-### Publisher chống tải PDF
-
-Một số trang yêu cầu login/cookie hoặc tải PDF qua URL đặc biệt. Nếu extension không đọc được trang publisher:
-
-- thử bản arXiv,
-- hoặc mở link PDF trực tiếp.
-
-### Website render đặc biệt
-
-Một số site dùng iframe/shadow DOM hoặc app JS phức tạp nên extraction HTML có thể không tốt. PDF thường ổn định hơn.
-
-### Công thức
-
-PDF.js lấy text của equation nhưng thứ tự/format công thức có thể không hoàn hảo. Bản MVP tập trung vào nội dung paper, không render lại công thức.
-
----
-
-## 16. Development workflow
-
-Sau khi sửa code:
+## Development
 
 ```bash
-npm run build
+npm test          # Run the extraction and PDF handling tests
+npm run build    # Build the unpacked extension into dist/
+npm run dev      # Start the Vite development server
+npm run preview  # Preview the built frontend
 ```
 
-Sau đó vào:
+The development server and frontend preview do not provide the full extension environment. To verify browser integration, build the project and load `dist/` as an unpacked extension.
 
-```text
-chrome://extensions
-```
+After changing code:
 
-Bấm nút **Reload** trên extension.
+1. Run `npm run build`.
+2. Open your browser's extension manager.
+3. Click **Reload** on the extension.
+4. Reopen the side panel. Reanalyze the paper if you changed the AI prompts.
 
-Không cần xóa/cài lại.
+### Customize the AI behavior
 
----
+Edit `public/service-worker.js`:
 
-## 17. Cấu trúc source
+- `SUMMARY_SYSTEM_INSTRUCTION`: summary language, detail, grounding, and methods explanations.
+- `RESPONSE_SCHEMA`: the structured analysis fields.
+- `QA_SYSTEM_INSTRUCTION`: follow-up answer behavior.
+
+### Source structure
 
 ```text
 ai-paper-reader/
@@ -424,73 +188,34 @@ ai-paper-reader/
 ├── vite.config.js
 ├── sidepanel.html
 ├── README.md
-│
 ├── public/
-│   ├── manifest.json
-│   └── service-worker.js
-│
-└── src/
-    ├── main.js
-    ├── styles.css
-    ├── pdf.js
-    ├── page.js
-    └── paperProcessing.js
+│   ├── manifest.json          # Extension metadata and permissions
+│   └── service-worker.js     # Gemini requests, prompts, and response handling
+├── src/
+│   ├── main.js               # Side panel UI, settings, cache, and Q&A
+│   ├── styles.css            # Side panel styles
+│   ├── extraction.js         # HTML/PDF extraction routing and fallbacks
+│   ├── page.js               # HTML text and PDF link extraction
+│   ├── pdfSource.js          # PDF URL detection and download validation
+│   ├── pdf.js                # PDF.js text extraction
+│   └── paperProcessing.js    # Text cleanup and summary excerpt selection
+└── test/
+    └── extraction.test.js    # Extraction and PDF handling tests
 ```
 
-### `main.js`
+## Limitations and troubleshooting
 
-Điều khiển UI, active tab, cache, gọi extraction và gửi message sang service worker.
+| Issue | What to check |
+| --- | --- |
+| Missing or invalid API key | Open settings and verify your Gemini key. |
+| Model unavailable | Enter a model ID that your API account can access. |
+| Quota or rate-limit errors | Check your Gemini account's available quota and retry later. |
+| Browser refuses page access | Open a regular paper or PDF URL; browser system pages and other restricted pages cannot be extracted. |
+| PDF contains little or no text | Scanned or image-only PDFs require OCR, which is not implemented. |
+| Publisher PDF cannot be downloaded | Access may require authentication or be blocked. Try an accessible direct PDF or an arXiv version. |
+| HTML extraction misses content | Complex page layouts, embedded content, and dynamic rendering can affect extraction. Try the PDF version. |
+| Equations look incomplete | PDF text extraction may lose mathematical layout or reading order. Check the original paper. |
+| Side panel does not open | Check browser compatibility and reload the extension. |
+| Old results remain after a change | Rebuild, reload the extension, and use the reanalyze button to replace cached results. |
 
-### `pdf.js`
-
-Download + đọc PDF bằng PDF.js.
-
-### `page.js`
-
-Inject script vào tab để lấy text từ paper dạng HTML.
-
-### `paperProcessing.js`
-
-Clean text, bỏ References, chọn section quan trọng khi paper quá dài.
-
-### `service-worker.js`
-
-Gọi OpenAI Responses API và ép kết quả về JSON schema.
-
----
-
-## 18. Nếu gặp lỗi
-
-### `API key không hợp lệ`
-
-Kiểm tra key và billing/quota OpenAI.
-
-### `model not found`
-
-Vào Settings đổi model thành model mà API account của bạn có quyền dùng.
-
-### `Cannot access contents of the page`
-
-Trang đó có thể là trang hệ thống, Chrome Web Store, hoặc trang bị giới hạn. Mở paper/PDF ở URL bình thường.
-
-### `PDF gần như không có text layer`
-
-Đây thường là PDF scan. Bản này chưa OCR.
-
-### Extension không mở side panel
-
-Kiểm tra Chrome >= 114 và reload extension ở `chrome://extensions`.
-
----
-
-## 19. Bảo mật cho trường hợp cá nhân
-
-Thiết kế hiện tại phù hợp khi:
-
-- chỉ bạn dùng,
-- không publish extension,
-- máy/profile Chrome là của bạn.
-
-API key nằm trong Chrome local storage. Người có quyền truy cập profile trình duyệt hoặc máy của bạn vẫn có thể lấy được key.
-
-Nếu sau này chia sẻ extension cho người khác, hãy chuyển lời gọi OpenAI sang backend và giữ API key ở server.
+AI-generated analysis can contain mistakes. Check important claims and numerical results against the original paper.
